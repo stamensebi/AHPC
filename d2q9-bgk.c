@@ -60,7 +60,7 @@ int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr
 float total_density(const t_param params, t_speed* cells);
 
 /* compute average velocity */
-float av_velocity(const t_param params, t_speed* cells, int* obstacles);
+float av_velocity(const t_param params, t_speed* cells, int* obstacles, int start, int end, float* result);
 
 /* calculate Reynolds number */
 float calc_reynolds(const t_param params, t_speed* cells, int* obstacles);
@@ -153,6 +153,7 @@ int main(int argc, char* argv[])
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
   tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
+  float round_res[2];
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {
@@ -177,7 +178,7 @@ int main(int argc, char* argv[])
 
 
     timestep(params, cells, tmp_cells, obstacles, start, end, myrank, size, recvbufTop, recvbufBot);
-    av_vels[tt] = av_velocity(params, cells, obstacles);
+    av_vels[tt] = av_velocity(params, cells, obstacles, start, end, round_res);
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
@@ -442,7 +443,7 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   return EXIT_SUCCESS;
 }
 
-float av_velocity(const t_param params, t_speed* cells, int* obstacles)
+float av_velocity(const t_param params, t_speed* cells, int* obstacles, int start, int end, float* result)
 {
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u;          /* accumulated magnitudes of velocity for each cell */
@@ -451,7 +452,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
   tot_u = 0.f;
 
   /* loop over all non-blocked cells */
-  for (int jj = 0; jj < params.ny; jj++)
+  for (int jj = start; jj <= end; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
@@ -489,7 +490,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
       }
     }
   }
-
+  result[0] = tot_u;
+  result[1] = tot_cells;
   return tot_u / (float)tot_cells;
 }
 
