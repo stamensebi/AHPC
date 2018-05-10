@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 
     printf("RECEIVED:\n" );
     for (int i = 0; i < bufSize; i++)
-      printf("%d\n", recvbuf[0].speeds[0]);
+      printf("%.6f\n", recvbuf[0].speeds[0]);
 
 
     timestep(params, cells, tmp_cells, obstacles);
