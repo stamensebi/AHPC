@@ -213,8 +213,8 @@ int main(int argc, char* argv[])
 
 
 
-     MPI_Sendrecv(sendbuf, bufSize, t_speed, down, tag,
-           recvbuf, bufSize, t_speed, down, tag, MPI_COMM_WORLD, &status);
+     MPI_Sendrecv(sendbuf, bufSize, Cell, down, tag,
+           recvbuf, bufSize, Cell, down, tag, MPI_COMM_WORLD, &status);
 
 
     printf("RECEIVED:\n" );
