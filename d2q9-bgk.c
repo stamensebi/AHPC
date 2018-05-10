@@ -184,8 +184,8 @@ int main(int argc, char* argv[])
   if (size!=1)
   remaining = params.ny % size;
 
-  //if (myrank == size - 1)
-    //end += remaining;
+  if (myrank == size - 1)
+    end += remaining;
 
 
 
@@ -196,8 +196,8 @@ int main(int argc, char* argv[])
   int bufSize = sizeof(t_speed) * params.nx;
 
 
-  sendbuf = (t_speed*)malloc(bufSize);
-  recvbuf = (t_speed*)malloc(bufSize);
+  sendbuf = (t_speed*)malloc(sizeof(t_speed) * params.nx);
+  recvbuf = (t_speed*)malloc(sizeof(t_speed) * params.nx);
 
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
@@ -213,8 +213,8 @@ int main(int argc, char* argv[])
 
 
 
-     MPI_Sendrecv(sendbuf, bufSize, Cell, down, tag,
-           recvbuf, bufSize, Cell, down, tag, MPI_COMM_WORLD, &status);
+     MPI_Sendrecv(sendbuf, params.nx, Cell, down, tag,
+           recvbuf, params.nx, Cell, down, tag, MPI_COMM_WORLD, &status);
 
 
     printf("RECEIVED:\n" );
