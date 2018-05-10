@@ -131,13 +131,17 @@ int main(int argc, char* argv[])
   int down;
   int size;
   int tag = 0;
-  MPI_Status status;    
+  MPI_Status status;
   char sendbuf[BUFSIZ];
   char recvbuf[BUFSIZ];
 
   MPI_Init( &argc, &argv );
   MPI_Comm_size( MPI_COMM_WORLD, &size );
   MPI_Comm_rank( MPI_COMM_WORLD, &myrank );
+
+  up = (myrank == 0) ? (size - 1) : (myrank - 1);
+  down = (myrank + 1) % size;
+
 
 
   char*    paramfile = NULL;    /* name of the input parameter file */
