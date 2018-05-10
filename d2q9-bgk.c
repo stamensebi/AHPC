@@ -132,6 +132,10 @@ int main(int argc, char* argv[])
   int size;
   int tag = 0;
   MPI_Status status;
+  MPI_Datatype Cell;
+  MPI_Type_contiguous(9, MPI_FLOAT, &Cell);
+  MPI_Type_commit(&Cell);
+
   t_speed* recvbuf;
   t_speed* sendbuf;
 
@@ -190,10 +194,10 @@ int main(int argc, char* argv[])
 
   //Initialise MPI buffers
   int bufSize = sizeof(t_speed) * params.nx;
+
+
   sendbuf = (t_speed*)malloc(bufSize);
   recvbuf = (t_speed*)malloc(bufSize);
-
-
 
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
@@ -207,8 +211,10 @@ int main(int argc, char* argv[])
       sendbuf[i] = cells[i + params.nx * (end)];
     }
 
-    MPI_Sendrecv(sendbuf, bufSize, t_speed, down, tag,
-          recvbuf, bufSize, t_speed, down, tag, MPI_COMM_WORLD, &status);
+
+
+     MPI_Sendrecv(sendbuf, bufSize, t_speed, down, tag,
+           recvbuf, bufSize, t_speed, down, tag, MPI_COMM_WORLD, &status);
 
 
     printf("RECEIVED:\n" );
@@ -224,6 +230,9 @@ int main(int argc, char* argv[])
     printf("tot density: %.12E\n", total_density(params, cells));
 #endif
   }
+
+  MPI_Type_free(&Cell);
+
 
   gettimeofday(&timstr, NULL);
   toc = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
