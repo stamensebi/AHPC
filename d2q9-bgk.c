@@ -204,6 +204,7 @@ int main(int argc, char* argv[])
   }
   write_values(params, cells, obstacles, av_vels);
   finalise(&params, &cells, &tmp_cells, &obstacles, &av_vels);
+  MPI_Finalize();
 
   return EXIT_SUCCESS;
 }
