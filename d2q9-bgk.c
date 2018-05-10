@@ -212,7 +212,7 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   if (rank == size - 1)
     accelerate_flow(params, cells, obstacles);
   propagate(params, cells, tmp_cells, start, end, top, bot);
-  rebound(params, cells, tmp_cells, obstacles, start, end, top, bot);
+  rebound(params, cells, tmp_cells, obstacles, start, end);
   collision(params, cells, tmp_cells, obstacles, start, end, top, bot);
   return EXIT_SUCCESS;
 }
