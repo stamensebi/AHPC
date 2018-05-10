@@ -132,8 +132,8 @@ int main(int argc, char* argv[])
   int size;
   int tag = 0;
   MPI_Status status;
-  char sendbuf[BUFSIZ];
-  char recvbuf[BUFSIZ];
+  t_speed* recvbuf;
+  t_speed* sendbuf;
 
   MPI_Init( &argc, &argv );
   MPI_Comm_size( MPI_COMM_WORLD, &size );
@@ -141,7 +141,6 @@ int main(int argc, char* argv[])
 
   up = (myrank == 0) ? (size - 1) : (myrank - 1);
   down = (myrank + 1) % size;
-
 
 
   char*    paramfile = NULL;    /* name of the input parameter file */
@@ -171,12 +170,52 @@ int main(int argc, char* argv[])
   /* initialise our data structures and load values from file */
   initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels);
 
+
+  // Calculate the workload for each MPI rank
+  int block_h = params.ny / size;
+  int remaining = 0;
+  int start = block_h * myrank;
+  int end = block_h * (myrank + 1) - 1;
+
+  if (size!=1)
+  remaining = params.ny % size;
+
+  if (myrank == size - 1)
+    end += remaining;
+
+
+
+  // if (myrank < remaining)
+  //   block_h++;
+
+  //Initialise MPI buffers
+  int bufSize = sizeof(t_speed) * params.nx;
+  sendbuf = (t_speed*)malloc(bufSize);
+  recvbuf = (t_speed*)malloc(bufSize);
+
+
+
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
   tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {
+
+    for (int i = 0; i<params.nx; i++)
+    {
+      sendbuf[i] = cells[i + params.nx * (end)];
+    }
+
+    MPI_Sendrecv(sendbuf, bufSize, t_speed, down, tag,
+          recvbuf, bufSize, t_speed, down, tag, MPI_COMM_WORLD, &status);
+
+
+    printf("RECEIVED:\n" );
+    for (int i = 0; i < bufSize; i++)
+      printf("%d\n", recvbuf[0].speeds[0]);
+
+
     timestep(params, cells, tmp_cells, obstacles);
     av_vels[tt] = av_velocity(params, cells, obstacles);
 #ifdef DEBUG
