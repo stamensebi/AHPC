@@ -126,6 +126,19 @@ int main(int argc, char* argv[])
   /* initialise our data structures and load values from file */
   initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels);
 
+  float total_cells = 0;
+  for (int jj = 0; jj < params.ny; jj++)
+  {
+    for (int ii = 0; ii < params.nx; ii++)
+    {
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*params.nx])
+      {
+        total_cells++;
+      }
+    }
+  }
+
 
   // Calculate the workload for each MPI rank
   int block_h = params.ny / size;
@@ -178,7 +191,13 @@ int main(int argc, char* argv[])
 
 
     timestep(params, cells, tmp_cells, obstacles, start, end, myrank, size, recvbufTop, recvbufBot);
-    av_vels[tt] = av_velocity(params, cells, obstacles, start, end, round_res);
+    float local_vel = av_velocity(params, cells, obstacles, start, end);
+    float avg_vel;
+    MPI_Reduce(&local_vel, &avg_vel, 1, MPI_FLOAT, MPI_SUM, 0,
+           MPI_COMM_WORLD);
+    if (myrank == 0)
+      av_vels[tt] = avg_vel/(float)total_cells;
+
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
@@ -205,8 +224,8 @@ int main(int argc, char* argv[])
   printf("Elapsed system CPU time:\t%.6lf (s)\n", systim);
 
   write_values(params, cells, obstacles, av_vels);
-  finalise(&params, &cells, &tmp_cells, &obstacles, &av_vels);
 }
+  finalise(&params, &cells, &tmp_cells, &obstacles, &av_vels);
   MPI_Finalize();
 
   return EXIT_SUCCESS;
@@ -443,9 +462,8 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   return EXIT_SUCCESS;
 }
 
-float av_velocity(const t_param params, t_speed* cells, int* obstacles, int start, int end, float* result)
+float av_velocity(const t_param params, t_speed* cells, int* obstacles, int start, int end)
 {
-  int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u;          /* accumulated magnitudes of velocity for each cell */
 
   /* initialise */
@@ -486,13 +504,10 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, int star
         /* accumulate the norm of x- and y- velocity components */
         tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
         /* increase counter of inspected cells */
-        ++tot_cells;
       }
     }
   }
-  result[0] = tot_u;
-  result[1] = tot_cells;
-  return tot_u / (float)tot_cells;
+  return tot_u ;/// (float)tot_cells;
 }
 
 int initialise(const char* paramfile, const char* obstaclefile,
@@ -675,8 +690,8 @@ int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr
 float calc_reynolds(const t_param params, t_speed* cells, int* obstacles)
 {
   const float viscosity = 1.f / 6.f * (2.f / params.omega - 1.f);
-  float* idx[2];
-  return av_velocity(params, cells, obstacles, 0, 10, idx) * params.reynolds_dim / viscosity;
+
+  return av_velocity(params, cells, obstacles) * params.reynolds_dim / viscosity;
 }
 
 float total_density(const t_param params, t_speed* cells)
