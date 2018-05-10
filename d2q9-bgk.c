@@ -217,10 +217,10 @@ int main(int argc, char* argv[])
            recvbuf, params.nx, Cell, down, tag, MPI_COMM_WORLD, &status);
 
 
-    printf("RECEIVED:\n" );
-    for (int i = 0; i < params.nx; i++)
-      printf("%.6f\n", recvbuf[i].speeds[0]);
-
+    printf("RECEIVED: " );
+    //for (int i = 0; i < params.nx; i++)
+      printf("%.6f\n", recvbuf[0].speeds[0]);
+      printf("SENT:    ", sendbuf[0].speeds[0] );
 
     timestep(params, cells, tmp_cells, obstacles);
     av_vels[tt] = av_velocity(params, cells, obstacles);
