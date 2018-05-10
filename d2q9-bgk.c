@@ -133,7 +133,8 @@ int main(int argc, char* argv[])
   int tag = 0;
   MPI_Status status;
 
-  t_speed* recvbuf;
+  t_speed* recvbufTop;
+  t_speed* recvbufBot;
   t_speed* sendbuf;
 
   MPI_Init( &argc, &argv );
@@ -195,7 +196,8 @@ int main(int argc, char* argv[])
   //Initialise MPI buffers
 
   sendbuf = (t_speed*)malloc(sizeof(t_speed) * params.nx);
-  recvbuf = (t_speed*)malloc(sizeof(t_speed) * params.nx);
+  recvbufTop = (t_speed*)malloc(sizeof(t_speed) * params.nx);
+  recvbufBot = (t_speed*)malloc(sizeof(t_speed) * params.nx);
 
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
@@ -204,19 +206,26 @@ int main(int argc, char* argv[])
   for (int tt = 0; tt < params.maxIters; tt++)
   {
 
+    //Send bottom row, receive bottom buffer.
     for (int i = 0; i<params.nx; i++)
     {
       sendbuf[i] = cells[i + params.nx * (end)];
     }
 
-
-
      MPI_Sendrecv(sendbuf, params.nx, Cell, down, tag,
-           recvbuf, params.nx, Cell, down, tag, MPI_COMM_WORLD, &status);
+           recvbufTop, params.nx, Cell, up, tag, MPI_COMM_WORLD, &status);
+
+     //Send top row, receive top buffer.
+     for (int i = 0; i<params.nx; i++)
+     {
+       sendbuf[i] = cells[i + params.nx * (start)];
+     }
+
+     MPI_Sendrecv(sendbuf, params.nx, Cell, up, tag,
+           recvbufBot, params.nx, Cell, down, tag, MPI_COMM_WORLD, &status);
 
 
-
-    timestep(params, cells, tmp_cells, obstacles);
+    timestep(params, cells, tmp_cells, obstacles, start, end, myrank, size, recvbufTop, recvbufBot);
     av_vels[tt] = av_velocity(params, cells, obstacles);
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
@@ -248,12 +257,13 @@ int main(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 
-int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
+int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end, int rank, int size, t_speed* top, t_speed* bot)
 {
-  accelerate_flow(params, cells, obstacles);
-  propagate(params, cells, tmp_cells);
-  rebound(params, cells, tmp_cells, obstacles);
-  collision(params, cells, tmp_cells, obstacles);
+  if (rank == size - 1)
+    accelerate_flow(params, cells, obstacles);
+  propagate(params, cells, tmp_cells, start, end, top, bot);
+  rebound(params, cells, tmp_cells, obstacles, start, end, top, bot);
+  collision(params, cells, tmp_cells, obstacles, start, end, top, bot);
   return EXIT_SUCCESS;
 }
 
@@ -289,10 +299,10 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
   return EXIT_SUCCESS;
 }
 
-int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
+int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, int start, int end, t_speed* top, t_speed* bot)
 {
   /* loop over _all_ cells */
-  for (int jj = 0; jj < params.ny; jj++)
+  for (int jj = start; jj <= end; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
@@ -302,28 +312,56 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
       int x_e = (ii + 1) % params.nx;
       int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
       int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
-      /* propagate densities from neighbouring cells, following
-      ** appropriate directions of travel and writing into
-      ** scratch space grid */
-      tmp_cells[ii + jj*params.nx].speeds[0] = cells[ii + jj*params.nx].speeds[0]; /* central cell, no movement */
-      tmp_cells[ii + jj*params.nx].speeds[1] = cells[x_w + jj*params.nx].speeds[1]; /* east */
-      tmp_cells[ii + jj*params.nx].speeds[2] = cells[ii + y_s*params.nx].speeds[2]; /* north */
-      tmp_cells[ii + jj*params.nx].speeds[3] = cells[x_e + jj*params.nx].speeds[3]; /* west */
-      tmp_cells[ii + jj*params.nx].speeds[4] = cells[ii + y_n*params.nx].speeds[4]; /* south */
-      tmp_cells[ii + jj*params.nx].speeds[5] = cells[x_w + y_s*params.nx].speeds[5]; /* north-east */
-      tmp_cells[ii + jj*params.nx].speeds[6] = cells[x_e + y_s*params.nx].speeds[6]; /* north-west */
-      tmp_cells[ii + jj*params.nx].speeds[7] = cells[x_e + y_n*params.nx].speeds[7]; /* south-west */
-      tmp_cells[ii + jj*params.nx].speeds[8] = cells[x_w + y_n*params.nx].speeds[8]; /* south-east */
+
+      if (jj == start)
+      {
+        tmp_cells[ii + jj*params.nx].speeds[0] = cells[ii + jj*params.nx].speeds[0]; /* central cell, no movement */
+        tmp_cells[ii + jj*params.nx].speeds[1] = cells[x_w + jj*params.nx].speeds[1]; /* east */
+        tmp_cells[ii + jj*params.nx].speeds[2] = top[ii].speeds[2]; /* north */
+        tmp_cells[ii + jj*params.nx].speeds[3] = cells[x_e + jj*params.nx].speeds[3]; /* west */
+        tmp_cells[ii + jj*params.nx].speeds[4] = cells[ii + y_n*params.nx].speeds[4]; /* south */
+        tmp_cells[ii + jj*params.nx].speeds[5] = top[ii].speeds[5]; /* north-east */
+        tmp_cells[ii + jj*params.nx].speeds[6] = top[ii].speeds[6]; /* north-west */
+        tmp_cells[ii + jj*params.nx].speeds[7] = cells[x_e + y_n*params.nx].speeds[7]; /* south-west */
+        tmp_cells[ii + jj*params.nx].speeds[8] = cells[x_w + y_n*params.nx].speeds[8]; /* south-east */
+
+      }
+      else if(jj == end)
+      {
+        tmp_cells[ii + jj*params.nx].speeds[0] = cells[ii + jj*params.nx].speeds[0]; /* central cell, no movement */
+        tmp_cells[ii + jj*params.nx].speeds[1] = cells[x_w + jj*params.nx].speeds[1]; /* east */
+        tmp_cells[ii + jj*params.nx].speeds[2] = cells[ii + y_s*params.nx].speeds[2]; /* north */
+        tmp_cells[ii + jj*params.nx].speeds[3] = cells[x_e + jj*params.nx].speeds[3]; /* west */
+        tmp_cells[ii + jj*params.nx].speeds[4] = bot[ii].speeds[4]; /* south */
+        tmp_cells[ii + jj*params.nx].speeds[5] = cells[x_w + y_s*params.nx].speeds[5]; /* north-east */
+        tmp_cells[ii + jj*params.nx].speeds[6] = cells[x_e + y_s*params.nx].speeds[6]; /* north-west */
+        tmp_cells[ii + jj*params.nx].speeds[7] = bot[ii].speeds[7]; /* south-west */
+        tmp_cells[ii + jj*params.nx].speeds[8] = bot[ii].speeds[8]; /* south-east */
+
+      }
+
+      else
+      {
+        tmp_cells[ii + jj*params.nx].speeds[0] = cells[ii + jj*params.nx].speeds[0]; /* central cell, no movement */
+        tmp_cells[ii + jj*params.nx].speeds[1] = cells[x_w + jj*params.nx].speeds[1]; /* east */
+        tmp_cells[ii + jj*params.nx].speeds[2] = cells[ii + y_s*params.nx].speeds[2]; /* north */
+        tmp_cells[ii + jj*params.nx].speeds[3] = cells[x_e + jj*params.nx].speeds[3]; /* west */
+        tmp_cells[ii + jj*params.nx].speeds[4] = cells[ii + y_n*params.nx].speeds[4]; /* south */
+        tmp_cells[ii + jj*params.nx].speeds[5] = cells[x_w + y_s*params.nx].speeds[5]; /* north-east */
+        tmp_cells[ii + jj*params.nx].speeds[6] = cells[x_e + y_s*params.nx].speeds[6]; /* north-west */
+        tmp_cells[ii + jj*params.nx].speeds[7] = cells[x_e + y_n*params.nx].speeds[7]; /* south-west */
+        tmp_cells[ii + jj*params.nx].speeds[8] = cells[x_w + y_n*params.nx].speeds[8]; /* south-east */
+      }
     }
   }
 
   return EXIT_SUCCESS;
 }
 
-int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
+int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end)
 {
   /* loop over the cells in the grid */
-  for (int jj = 0; jj < params.ny; jj++)
+  for (int jj = start; jj <= end; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
@@ -347,7 +385,7 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   return EXIT_SUCCESS;
 }
 
-int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
+int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end, t_speed* top, t_speed* bot)
 {
   const float c_sq = 1.f / 3.f; /* square of speed of sound */
   const float w0 = 4.f / 9.f;  /* weighting factor */
@@ -358,7 +396,7 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   ** NB the collision step is called after
   ** the propagate step and so values of interest
   ** are in the scratch-space grid */
-  for (int jj = 0; jj < params.ny; jj++)
+  for (int jj = start; jj <= end; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
