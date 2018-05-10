@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
     printf("RECEIVED: " );
     //for (int i = 0; i < params.nx; i++)
       printf("%.6f\n", recvbuf[0].speeds[0]);
-      printf("SENT:    ", sendbuf[0].speeds[0] );
+      printf("SENT:   %.6f ", sendbuf[0].speeds[0] );
 
     timestep(params, cells, tmp_cells, obstacles);
     av_vels[tt] = av_velocity(params, cells, obstacles);
