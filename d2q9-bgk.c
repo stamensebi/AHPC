@@ -132,14 +132,14 @@ int main(int argc, char* argv[])
   int size;
   int tag = 0;
   MPI_Status status;
-  MPI_Datatype Cell;
-  MPI_Type_contiguous(9, MPI_FLOAT, &Cell);
-  MPI_Type_commit(&Cell);
 
   t_speed* recvbuf;
   t_speed* sendbuf;
 
   MPI_Init( &argc, &argv );
+  MPI_Datatype Cell;
+  MPI_Type_contiguous(9, MPI_FLOAT, &Cell);
+  MPI_Type_commit(&Cell);
   MPI_Comm_size( MPI_COMM_WORLD, &size );
   MPI_Comm_rank( MPI_COMM_WORLD, &myrank );
 
