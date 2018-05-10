@@ -215,10 +215,6 @@ int main(int argc, char* argv[])
            recvbuf, params.nx, Cell, down, tag, MPI_COMM_WORLD, &status);
 
 
-     printf("%d RECEIVED: ", myrank );
-    // //for (int i = 0; i < params.nx; i++)
-       printf("%.6f FROM %d\n", recvbuf[0].speeds[0], down);
-       printf("SENT:   %.6f ", sendbuf[0].speeds[0] );
 
     timestep(params, cells, tmp_cells, obstacles);
     av_vels[tt] = av_velocity(params, cells, obstacles);
