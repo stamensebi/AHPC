@@ -184,8 +184,8 @@ int main(int argc, char* argv[])
   if (size!=1)
   remaining = params.ny % size;
 
-  if (myrank == size - 1)
-    end += remaining;
+  //if (myrank == size - 1)
+    //end += remaining;
 
 
 
