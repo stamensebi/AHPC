@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
   if (myrank != 0)
   {
     printf("WORKLOAD TO BE SENT: %d \n", end-start+1);
-    MPI_Send(send_workload, end-start+1, Cell, 0, 0, MPI_COMM_WORLD);
+    MPI_Ssend(send_workload, end-start+1, Cell, 0, 0, MPI_COMM_WORLD);
   }
 
 
