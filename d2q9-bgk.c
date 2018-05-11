@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
     if (myrank == 0)
     {
       // avg_vel += local_vel;
-      av_vels[tt] = avg_vel/(float)divide;
+      av_vels[tt] = avg_vel/(float)tot_cells;
     //  printf("AVG VEL ============================ %.6f\n", av_vels[tt] );
     }
 
