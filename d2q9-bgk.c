@@ -50,6 +50,8 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, int star
 int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end);
 int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end, t_speed* top, t_speed* bot);
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
+int tot_cells_per_rank (const t_param params, t_speed* cells, int* obstacles, int start, int end);
+
 
 /* finalise, including freeing up allocated memory */
 int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
@@ -195,10 +197,15 @@ int main(int argc, char* argv[])
     //printf("%.6f \n", local_vel );
     MPI_Reduce(&local_vel, &avg_vel, 1, MPI_FLOAT, MPI_SUM, 0,
            MPI_COMM_WORLD);
+    int divide = 0;
+    int local_divide = tot_cells_per_rank(params, cells, obstacles, start, end);
+    MPI_Reduce(&local_divide, &divide, 1, MPI_FLOAT, MPI_SUM, 0,
+           MPI_COMM_WORLD);
+
     if (myrank == 0)
     {
       // avg_vel += local_vel;
-      av_vels[tt] = avg_vel/(float)total_cells;
+      av_vels[tt] = avg_vel/(float)divide;
     //  printf("AVG VEL ============================ %.6f\n", av_vels[tt] );
     }
 
@@ -234,9 +241,7 @@ int main(int argc, char* argv[])
       if (sender == size - 1)
       send_end += remaining;
       t_speed* recv_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (send_end - send_start + 1));
-      printf("%d RECV WORKLOAD SIZE \n", send_end - send_start + 1 );
       MPI_Recv(recv_workload, params.nx*(send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      printf("RECEIVED \n" );
       for (int jj = send_start; jj<= send_end; jj++)
       {
         for(int ii = 0; ii<params.nx; ii++)
@@ -517,6 +522,22 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   }
 
   return EXIT_SUCCESS;
+}
+
+int tot_cells_per_rank (const t_param params, t_speed* cells, int* obstacles, int start, int end)
+{
+  int tot = 0;
+  for (int jj = start; jj <= end; jj++)
+  {
+    for (int ii = 0; ii < params.nx; ii++)
+    {
+      if (!obstacles[ii + jj*params.nx])
+      {
+        tot++;
+      }
+    }
+  }
+  return tot;
 }
 
 float av_velocity(const t_param params, t_speed* cells, int* obstacles, int start, int end)
