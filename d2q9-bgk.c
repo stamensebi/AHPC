@@ -193,12 +193,12 @@ int main(int argc, char* argv[])
     timestep(params, cells, tmp_cells, obstacles, start, end, myrank, size, recvbufTop, recvbufBot);
     float local_vel = av_velocity(params, cells, obstacles, start, end);
     float avg_vel;
-    printf("%.6f \n", local_vel );
+    //printf("%.6f \n", local_vel );
     MPI_Reduce(&local_vel, &avg_vel, 1, MPI_FLOAT, MPI_SUM, 0,
            MPI_COMM_WORLD);
     if (myrank == 0)
     {
-      avg_vel += local_vel;
+      // avg_vel += local_vel;
       av_vels[tt] = avg_vel/(float)total_cells;
     //  printf("AVG VEL ============================ %.6f\n", av_vels[tt] );
     }
