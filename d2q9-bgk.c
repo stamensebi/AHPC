@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
           cells[ii + jj*params.nx].speeds[7] = recv_workload[ii + (jj - send_start)*params.nx].speeds[7]; /* south-west */
           cells[ii + jj*params.nx].speeds[8] = recv_workload[ii + (jj - send_start)*params.nx].speeds[8]; /* south-east */
 
-          printf("%.6f CELL\n", cells[ii+jj*params.nx].speeds[0] );
+          printf("%.6f CELL\n", recv_workload[ii+jj*params.nx].speeds[0] );
         }
       }
     }
