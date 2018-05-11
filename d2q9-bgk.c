@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
       {
         for(int ii = 0; ii<params.nx; ii++)
         {
-          cells[ii + jj*params.nx] = recv_workload[ii + (jj - start)*params.nx];
+          cells[ii + jj*params.nx] = recv_workload[ii + (jj - send_start)*params.nx];
         }
       }
     }
