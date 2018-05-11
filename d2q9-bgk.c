@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
     //Send bottom row, receive bottom buffer.
     for (int i = 0; i<params.nx; i++)
     {
-      sendbuf[i] = cells[i + params.nx * (start)];
+      sendbuf[i] = cells[i + params.nx * (end)];
     }
 
      MPI_Sendrecv(sendbuf, params.nx, Cell, down, tag,
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
      //Send top row, receive top buffer.
      for (int i = 0; i<params.nx; i++)
      {
-       sendbuf[i] = cells[i + params.nx * (end)];
+       sendbuf[i] = cells[i + params.nx * (start)];
      }
 
      MPI_Sendrecv(sendbuf, params.nx, Cell, up, tag,
