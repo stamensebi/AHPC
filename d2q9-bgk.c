@@ -225,16 +225,14 @@ int main(int argc, char* argv[])
   {
     for (int sender = 1; sender<size; sender++)
     {
-      int send_start = block_h * myrank;
-      int send_end = block_h * (myrank + 1) - 1;
+      int send_start = block_h * sender;
+      int send_end = block_h * (sender + 1) - 1;
       if (sender == size - 1)
       send_end += remaining;
       t_speed* recv_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (send_end - send_start + 1));
-      printf("WORKLOAD TO BE RECEIVED %d\n", send_end - send_start +1);
       MPI_Recv(recv_workload, (send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       for (int jj = send_start; jj<= send_end; jj++)
       {
-        //printf("STORING AT %d, TOTAL %d \n", jj , jj-start);
         for(int ii = 0; ii<params.nx; ii++)
         {
           cells[ii + jj*params.nx] = recv_workload[ii + (jj - start)*params.nx];
@@ -245,9 +243,7 @@ int main(int argc, char* argv[])
   }
   if (myrank != 0)
   {
-    printf("WORKLOAD TO BE SENT: %d \n", end-start+1);
     MPI_Send(send_workload, end-start+1, Cell, 0, 0, MPI_COMM_WORLD);
-    printf("SENDING DONE \n" );
   }
 
 
