@@ -234,10 +234,10 @@ int main(int argc, char* argv[])
       MPI_Recv(recv_workload, (send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       for (int jj = send_start; jj<= send_end; send_end++)
       {
+        printf("STORING AT %d, TOTAL %d \n", jj , jj-start);
         for(int ii = 0; ii<params.nx; ii++)
         {
           cells[ii + jj*params.nx] = recv_workload[ii + (jj - start)*params.nx];
-          printf("STORING AT %d, TOTAL  \n", jj , jj-start);
         }
       }
     }
