@@ -193,13 +193,9 @@ int main(int argc, char* argv[])
 
     timestep(params, cells, tmp_cells, obstacles, start, end, myrank, size, recvbufTop, recvbufBot);
     float local_vel = av_velocity(params, cells, obstacles, start, end);
-    float avg_vel;
+    float avg_vel = 0;
     //printf("%.6f \n", local_vel );
     MPI_Reduce(&local_vel, &avg_vel, 1, MPI_FLOAT, MPI_SUM, 0,
-           MPI_COMM_WORLD);
-    int divide = 0;
-    int local_divide = tot_cells_per_rank(params, cells, obstacles, start, end);
-    MPI_Reduce(&local_divide, &divide, 1, MPI_FLOAT, MPI_SUM, 0,
            MPI_COMM_WORLD);
 
     if (myrank == 0)
