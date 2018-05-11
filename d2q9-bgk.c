@@ -242,6 +242,16 @@ int main(int argc, char* argv[])
         for(int ii = 0; ii<params.nx; ii++)
         {
           cells[ii + jj*params.nx] = recv_workload[ii + (jj - send_start)*params.nx];
+          cells[ii + jj*params.nx].speeds[0] = recv_workload[ii + (jj - send_start)*params.nx].speeds[0]; /* central cell, no movement */
+          cells[ii + jj*params.nx].speeds[1] = recv_workload[ii + (jj - send_start)*params.nx].speeds[1]; /* east */
+          cells[ii + jj*params.nx].speeds[2] = recv_workload[ii + (jj - send_start)*params.nx].speeds[2]; /* north */
+          cells[ii + jj*params.nx].speeds[3] = recv_workload[ii + (jj - send_start)*params.nx].speeds[3]; /* west */
+          cells[ii + jj*params.nx].speeds[4] = recv_workload[ii + (jj - send_start)*params.nx].speeds[4]; /* south */
+          cells[ii + jj*params.nx].speeds[5] = recv_workload[ii + (jj - send_start)*params.nx].speeds[5]; /* north-east */
+          cells[ii + jj*params.nx].speeds[6] = recv_workload[ii + (jj - send_start)*params.nx].speeds[6]; /* north-west */
+          cells[ii + jj*params.nx].speeds[7] = recv_workload[ii + (jj - send_start)*params.nx].speeds[7]; /* south-west */
+          cells[ii + jj*params.nx].speeds[8] = recv_workload[ii + (jj - send_start)*params.nx].speeds[8]; /* south-east */
+
           printf("%.6f CELL\n", cells[ii+jj*params.nx].speeds[0] );
         }
       }
