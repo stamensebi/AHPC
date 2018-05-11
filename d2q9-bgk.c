@@ -103,7 +103,6 @@ int main(int argc, char* argv[])
   t_param  params;              /* struct to hold parameter values */
   t_speed* cells     = NULL;    /* grid containing fluid densities */
   t_speed* tmp_cells = NULL;    /* scratch space */
-  t_speed* workload = NULL;
   int*     obstacles = NULL;    /* grid indicating which cells are blocked */
   float* av_vels     = NULL;    /* a record of the av. velocity computed for each timestep */
   struct timeval timstr;        /* structure to hold elapsed time */
@@ -147,7 +146,7 @@ int main(int argc, char* argv[])
   int end = block_h * (myrank + 1) - 1;
 
   if (size!=1)
-  remaining = params.ny % size;
+    remaining = params.ny % size;
 
   if (myrank == size - 1)
     end += remaining;
@@ -209,9 +208,48 @@ int main(int argc, char* argv[])
     printf("tot density: %.12E\n", total_density(params, cells));
 #endif
   }
+  t_speed* send_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (end - start + 1));
+  if (myrank != 0)
+  {
+    for (int jj = 0; jj <= end - start; jj++)
+    {
+      for (int ii = 0; ii < params.nx; ii++)
+      {
+        send_workload[ii + jj*params.nx] = cells[ii + (jj + start)*params.nx]; /* central cell, no movement */
 
-  MPI_Type_free(&Cell);
+      }
+    }
+  }
 
+  if (myrank != 0)
+  {
+    MPI_Send(send_workload, end-start+1, Cell, 0, 0, MPI_COMM_WORLD);
+  }
+
+  if(myrank == 0)
+  {
+    for (int sender = 1; sender<size; sender++)
+    {
+      int send_start = block_h * myrank;
+      int send_end = block_h * (myrank + 1) - 1;
+      if (sender == size - 1)
+        send_end += remaining;
+      t_speed* recv_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (send_end - send_start + 1));
+      MPI_Recv(recv_workload, send_end - send_start + 1, Cell, sender, 0, MPI_COMM_WORLD);
+      for (int jj = send_start; jj<= send_end; send_end++)
+      {
+        for(int ii = 0; ii<params.nx; ii++)
+        {
+          cells[ii + jj*params.nx] = recv_workload[ii + (jj - start)*params.nx];
+        }
+      }
+    }
+
+  }
+
+
+  // MPI_Gather(&sub_avg, 1, MPI_FLOAT, sub_avgs, 1, MPI_FLOAT, 0,
+  //            MPI_COMM_WORLD);
 
   gettimeofday(&timstr, NULL);
   toc = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
@@ -231,6 +269,7 @@ int main(int argc, char* argv[])
   write_values(params, cells, obstacles, av_vels);
 }
   finalise(&params, &cells, &tmp_cells, &obstacles, &av_vels);
+  MPI_Type_free(&Cell);
   MPI_Finalize();
 
   return EXIT_SUCCESS;
