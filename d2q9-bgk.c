@@ -534,6 +534,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, int star
         {
           local_density += cells[ii + jj*params.nx].speeds[kk];
         }
+        if (local_density==0)
+          printf("BUGGGG\n" );
 
         /* x-component of velocity */
         float u_x = (cells[ii + jj*params.nx].speeds[1]
@@ -742,7 +744,6 @@ int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr
 float calc_reynolds(const t_param params, t_speed* cells, int* obstacles, int no_cells)
 {
   const float viscosity = 1.f / 6.f * (2.f / params.omega - 1.f);
-  printf("%.6f\n", av_velocity(params, cells, obstacles, 0, params.ny-1));
 
   return av_velocity(params, cells, obstacles, 0, params.ny-1)/(float)no_cells * params.reynolds_dim / viscosity;
 }
