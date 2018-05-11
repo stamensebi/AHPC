@@ -232,9 +232,9 @@ int main(int argc, char* argv[])
       t_speed* recv_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (send_end - send_start + 1));
       printf("WORKLOAD TO BE RECEIVED %d\n", send_end - send_start +1);
       MPI_Recv(recv_workload, (send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      for (int jj = send_start; jj<= send_end; send_end++)
+      for (int jj = send_start; jj<= send_end; jj++)
       {
-        printf("STORING AT %d, TOTAL %d \n", jj , jj-start);
+        //printf("STORING AT %d, TOTAL %d \n", jj , jj-start);
         for(int ii = 0; ii<params.nx; ii++)
         {
           cells[ii + jj*params.nx] = recv_workload[ii + (jj - start)*params.nx];
