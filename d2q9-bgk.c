@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
            MPI_COMM_WORLD);
     if (myrank == 0)
     {
-      avg_vel += local_vell
+      avg_vel += local_vel;
       av_vels[tt] = avg_vel/(float)total_cells;
       printf("AVG VEL ============================ %.6f\n", av_vels[tt] );
     }
