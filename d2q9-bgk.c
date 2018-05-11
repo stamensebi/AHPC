@@ -352,8 +352,8 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, int star
         tmp_cells[ii + jj*params.nx].speeds[2] = top[ii].speeds[2]; /* north */
         tmp_cells[ii + jj*params.nx].speeds[3] = cells[x_e + jj*params.nx].speeds[3]; /* west */
         tmp_cells[ii + jj*params.nx].speeds[4] = cells[ii + y_n*params.nx].speeds[4]; /* south */
-        tmp_cells[ii + jj*params.nx].speeds[5] = top[ii].speeds[5]; /* north-east */
-        tmp_cells[ii + jj*params.nx].speeds[6] = top[ii].speeds[6]; /* north-west */
+        tmp_cells[ii + jj*params.nx].speeds[5] = top[x_w].speeds[5]; /* north-east */
+        tmp_cells[ii + jj*params.nx].speeds[6] = top[x_e].speeds[6]; /* north-west */
         tmp_cells[ii + jj*params.nx].speeds[7] = cells[x_e + y_n*params.nx].speeds[7]; /* south-west */
         tmp_cells[ii + jj*params.nx].speeds[8] = cells[x_w + y_n*params.nx].speeds[8]; /* south-east */
 
@@ -367,8 +367,8 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, int star
         tmp_cells[ii + jj*params.nx].speeds[4] = bot[ii].speeds[4]; /* south */
         tmp_cells[ii + jj*params.nx].speeds[5] = cells[x_w + y_s*params.nx].speeds[5]; /* north-east */
         tmp_cells[ii + jj*params.nx].speeds[6] = cells[x_e + y_s*params.nx].speeds[6]; /* north-west */
-        tmp_cells[ii + jj*params.nx].speeds[7] = bot[ii].speeds[7]; /* south-west */
-        tmp_cells[ii + jj*params.nx].speeds[8] = bot[ii].speeds[8]; /* south-east */
+        tmp_cells[ii + jj*params.nx].speeds[7] = bot[x_e].speeds[7]; /* south-west */
+        tmp_cells[ii + jj*params.nx].speeds[8] = bot[x_w].speeds[8]; /* south-east */
 
       }
 
