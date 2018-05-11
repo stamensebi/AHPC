@@ -211,11 +211,12 @@ int main(int argc, char* argv[])
   t_speed* send_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (end - start + 1));
   if (myrank != 0)
   {
+    printf("START %d     END %d\n",start, end );
     for (int jj = 0; jj <= end - start; jj++)
     {
       for (int ii = 0; ii < params.nx; ii++)
       {
-        printf("%.6f\n", cells[ii+ (jj+start)*params.nx].speeds[0] );
+        //printf("%.6f\n", cells[ii+ (jj+start)*params.nx].speeds[0] );
         send_workload[ii + jj*params.nx] = cells[ii + (jj + start)*params.nx]; /* central cell, no movement */
 
       }
