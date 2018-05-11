@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
     if (myrank == 0)
     {
       av_vels[tt] = avg_vel/(float)total_cells;
-      printf("AVG VEL ============================ %.6f\n", );
+      printf("AVG VEL ============================ %.6f\n" );
     }
 
 #ifdef DEBUG
