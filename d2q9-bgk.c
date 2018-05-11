@@ -232,6 +232,7 @@ int main(int argc, char* argv[])
       t_speed* recv_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (send_end - send_start + 1));
       printf("%d RECV WORKLOAD SIZE \n", send_end - send_start + 1 );
       MPI_Recv(recv_workload, (send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      printf("RECEIVED \n" );
       for (int jj = send_start; jj<= send_end; jj++)
       {
         for(int ii = 0; ii<params.nx; ii++)
