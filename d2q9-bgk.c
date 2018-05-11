@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 
 int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end, int rank, int size, t_speed* top, t_speed* bot)
 {
-  //if (rank == size - 1)
+  if (rank == size - 1)
     accelerate_flow(params, cells, obstacles);
   propagate(params, cells, tmp_cells, start, end, top, bot);
   rebound(params, cells, tmp_cells, obstacles, start, end);
