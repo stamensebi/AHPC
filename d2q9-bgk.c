@@ -242,14 +242,11 @@ int main(int argc, char* argv[])
         for(int ii = 0; ii<params.nx; ii++)
         {
           cells[ii + jj*params.nx] = recv_workload[ii + (jj - send_start)*params.nx];
+          printf("%.6f CELL\n", cells[ii+jj*params.nx] );
         }
       }
     }
 
-  }
-  if (myrank != 0)
-  {
-    printf("SEND SIZE %d \n",end-start+1 );
   }
 
 
@@ -534,8 +531,6 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, int star
         {
           local_density += cells[ii + jj*params.nx].speeds[kk];
         }
-        if (local_density==0)
-          printf("BUGGGG\n" );
 
         /* x-component of velocity */
         float u_x = (cells[ii + jj*params.nx].speeds[1]
