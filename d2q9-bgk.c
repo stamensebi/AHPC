@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 
 int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end, int rank, int size, t_speed* top, t_speed* bot)
 {
-//  if (rank == size - 1)
+  if (rank == size - 1)
     accelerate_flow(params, cells, obstacles);
   propagate(params, cells, tmp_cells, start, end, top, bot);
   rebound(params, cells, tmp_cells, obstacles, start, end);
@@ -323,7 +323,7 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
 int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, int start, int end, t_speed* top, t_speed* bot)
 {
   /* loop over _all_ cells */
-  for (int jj = 0; jj <= params.ny; jj++)
+  for (int jj = start; jj <= end; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
@@ -382,7 +382,7 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, int star
 int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, int start, int end)
 {
   /* loop over the cells in the grid */
-  for (int jj = 0; jj <= params.ny; jj++)
+  for (int jj = start; jj <= end; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
