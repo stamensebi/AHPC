@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
 
       }
     }
-    MPI_Send(send_workload, end-start+1, Cell, 0, 0, MPI_COMM_WORLD);
+    MPI_Send(send_workload, params.nx*(end-start+1), Cell, 0, 0, MPI_COMM_WORLD);
 
   }
 
@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
       send_end += remaining;
       t_speed* recv_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (send_end - send_start + 1));
       printf("%d RECV WORKLOAD SIZE \n", send_end - send_start + 1 );
-      MPI_Recv(recv_workload, (send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      MPI_Recv(recv_workload, params.nx*(send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       printf("RECEIVED \n" );
       for (int jj = send_start; jj<= send_end; jj++)
       {
@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
           cells[ii + jj*params.nx].speeds[7] = recv_workload[ii + (jj - send_start)*params.nx].speeds[7]; /* south-west */
           cells[ii + jj*params.nx].speeds[8] = recv_workload[ii + (jj - send_start)*params.nx].speeds[8]; /* south-east */
 
-          printf("%.6f CELL\n", recv_workload[ii+jj*params.nx].speeds[0] );
+          //printf("%.6f CELL\n", recv_workload[ii+jj*params.nx].speeds[0] );
         }
       }
     }
