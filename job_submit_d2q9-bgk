@@ -2,9 +2,9 @@
 
 #SBATCH --job-name d2q9-bgk
 #SBATCH --nodes 4
-#SBATCH --ntasks-per-node 1
-#SBATCH --time 00:15:00
-#SBATCH --partition teaching
+#SBATCH --ntasks-per-node 28
+#SBATCH --time 00:1:00
+#SBATCH --partition cpu
 #SBATCH --output d2q9-bgk.out
 
 echo Running on host `hostname`
@@ -15,12 +15,5 @@ echo This job runs on the following machines:
 echo `echo $SLURM_JOB_NODELIST | uniq`
 
 #! Run the executable
-mpirun ./d2q9-bgk -np 1 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 14 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 28 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 42 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 56 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 70 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 84 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 98 input_128x128.params obstacles_1024x1024.dat
-mpirun ./d2q9-bgk -np 112 input_128x128.params obstacles_1024x1024.dat
+mpirun -np 112 ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+mpirun -np 112 ./d2q9-bgk input_1024x1024.params obstacles_1024x1024.dat
