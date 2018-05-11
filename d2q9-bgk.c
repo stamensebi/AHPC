@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
       if (sender == size - 1)
         send_end += remaining;
       t_speed* recv_workload = (t_speed*)malloc(sizeof(t_speed) * params.nx * (send_end - send_start + 1));
-      MPI_Recv(recv_workload, send_end - send_start + 1, Cell, sender, 0, MPI_COMM_WORLD);
+      MPI_Recv(recv_workload, (send_end - send_start + 1), Cell, sender, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       for (int jj = send_start; jj<= send_end; send_end++)
       {
         for(int ii = 0; ii<params.nx; ii++)
