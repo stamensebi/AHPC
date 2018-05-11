@@ -510,6 +510,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, int star
   return tot_u ;/// (float)tot_cells;
 }
 
+
+
 int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
                int** obstacles_ptr, float** av_vels_ptr)
@@ -691,7 +693,7 @@ float calc_reynolds(const t_param params, t_speed* cells, int* obstacles)
 {
   const float viscosity = 1.f / 6.f * (2.f / params.omega - 1.f);
 
-  return av_velocity(params, cells, obstacles) * params.reynolds_dim / viscosity;
+  return av_velocity(params, cells, obstacles, 0, params.ny-1) * params.reynolds_dim / viscosity;
 }
 
 float total_density(const t_param params, t_speed* cells)
