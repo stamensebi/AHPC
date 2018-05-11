@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
         for(int ii = 0; ii<params.nx; ii++)
         {
           cells[ii + jj*params.nx] = recv_workload[ii + (jj - send_start)*params.nx];
-          printf("%.6f CELL\n", cells[ii+jj*params.nx] );
+          printf("%.6f CELL\n", cells[ii+jj*params.nx].speeds[0] );
         }
       }
     }
