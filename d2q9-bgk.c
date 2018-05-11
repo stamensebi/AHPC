@@ -215,10 +215,13 @@ int main(int argc, char* argv[])
     {
       for (int ii = 0; ii < params.nx; ii++)
       {
+        printf("%.6f\n", cells[ii+ (jj+start)*params.nx].speeds[0] );
         send_workload[ii + jj*params.nx] = cells[ii + (jj + start)*params.nx]; /* central cell, no movement */
 
       }
     }
+    MPI_Send(send_workload, end-start+1, Cell, 0, 0, MPI_COMM_WORLD);
+
   }
 
   if(myrank == 0)
@@ -246,7 +249,6 @@ int main(int argc, char* argv[])
   if (myrank != 0)
   {
     printf("SEND SIZE %d \n",end-start+1 );
-    MPI_Send(send_workload, end-start+1, Cell, 0, 0, MPI_COMM_WORLD);
   }
 
 
